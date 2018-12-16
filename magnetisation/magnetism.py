@@ -1,0 +1,82 @@
+from math import tanh, sinh, cosh, exp, log
+from functools import partial
+from colorsys import hsv_to_rgb
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+# k = 1.38064852 × 10-23 m2 kg s-2 K-1
+
+# k = 1.38064852e-23  # Boltzmann constant
+k = 1.0
+mu_0 = 1.0
+T = 1.0
+beta = 1/(k * T)
+J = 1  # spin interaction coefficient
+
+H_min = -3.
+H_max = 3.
+H_step = 100
+
+margin = 0.1
+m_min = - mu_0 * (1 + margin)
+m_max = mu_0 * (1 + margin)
+yticks = np.linspace(-mu_0, mu_0, 10)
+
+Hs = np.linspace(H_min, H_max, H_step)
+
+
+def vanilla_mag_func(H, beta):
+    return mu_0 * tanh(mu_0 * beta * H)
+
+
+def mag_func_two_spin(H, beta, J):
+    H_ = 2 * beta * mu_0 * H
+    return mu_0 * sinh(H_)/(cosh(H_) + exp(- 2 * beta * J))
+
+
+steps = 50
+max_temp = 100
+min_temp = 0.1
+beta_range = np.linspace(1/(k * max_temp), 1/(k * min_temp), steps)
+# beta_range = [log(e) for e in np.linspace(exp(1/300), exp(4), steps)]
+col_range = np.linspace(3/3, 2/3, steps)
+# beta_range = [1/(k * T) for T in np.linspace(1, 300, steps)]
+# col_range = np.linspace(2/3, 3/3, steps)
+
+fig = plt.figure()
+st = fig.suptitle(r'Magnetisation curves')
+for i, J in enumerate([+1, -1]):
+    # Settings for each subplot
+    ax = fig.add_subplot(2, 1, i + 1)
+    ax.set_title(r'$J={}$, ${} < T < {}$ '.format(J, min_temp, max_temp))
+    ax.set_xlim([H_min, H_max])
+    ax.set_ylim([m_min, m_max])
+    ax.set_xlabel(r'External field strength: $H$')
+    ax.set_ylabel(r'Average magnetisation $<\hat{m}>$')
+    ax.set_aspect('auto')
+
+    # Get color function on hue
+    color_func = partial(hsv_to_rgb, s=1.0, v=1.0)
+    # Just include the vanilla tanh curve
+    func_list = [(partial(vanilla_mag_func, beta=beta), color_func(1/3))]
+
+    # Get a list of mag_func's with beta and J partially substituted
+    for b, c in zip(beta_range, col_range):
+        func_list.append((partial(mag_func_two_spin, beta=b, J=J), color_func(c)))
+
+    for func, color in func_list:
+        ms = [func(H) for H in Hs]
+        ax.plot(Hs, ms,
+                color=color,
+                lw=1,
+                alpha=0.6)
+
+# Avoid overlaps btwn the subplots
+plt.tight_layout()
+# Avoid overlaps between the supertitle and the subplots
+st.set_y(0.95)
+fig.subplots_adjust(top=0.85)
+
+fig.savefig("magnetisation.png")
