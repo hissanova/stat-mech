@@ -6,6 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+import plotly.plotly as py
+import plotly.graph_objs as go
+import plotly
+
+
 # k = 1.38064852 × 10-23 m2 kg s-2 K-1
 
 # k = 1.38064852e-23  # Boltzmann constant
@@ -36,13 +41,13 @@ def mag_func_two_spin(H, beta, J):
     return mu_0 * sinh(H_)/(cosh(H_) + exp(- 2 * beta * J))
 
 
-steps = 50
-max_temp = 100
-min_temp = 0.1
+steps = 100
+max_temp = 1000
+min_temp = 0.01
 beta_range = np.linspace(1/(k * max_temp), 1/(k * min_temp), steps)
 # beta_range = [log(e) for e in np.linspace(exp(1/300), exp(4), steps)]
 col_range = np.linspace(3/3, 2/3, steps)
-# beta_range = [1/(k * T) for T in np.linspace(1, 300, steps)]
+# beta_range = [1/(k * T) for T in np.linspace(min_temp, max_temp, steps)]
 # col_range = np.linspace(2/3, 3/3, steps)
 
 fig = plt.figure()
@@ -74,9 +79,38 @@ for i, J in enumerate([+1, -1]):
                 alpha=0.6)
 
 # Avoid overlaps btwn the subplots
-plt.tight_layout()
-# Avoid overlaps between the supertitle and the subplots
-st.set_y(0.95)
-fig.subplots_adjust(top=0.85)
+# plt.tight_layout()
+# # Avoid overlaps between the supertitle and the subplots
+# st.set_y(0.95)
+# fig.subplots_adjust(top=0.85)
 
-fig.savefig("magnetisation.png")
+# fig.savefig("magnetisation.png")
+
+
+steps = 100
+max_temp = 10
+min_temp = 0.01
+
+beta_range_dict = {'inverse_temp': np.linspace(1/(k * max_temp), 1/(k * min_temp), steps),
+                   'inverse_temp_log': [log(e) for e in np.linspace(exp(1/300), exp(4), steps)],
+                   'temp': [1/(k * T) for T in np.linspace(min_temp, max_temp, steps)]}
+# beta_range_type = 'inverse_temp'
+beta_range_type = 'temp'
+beta_range = beta_range_dict[beta_range_type]
+J = -1
+
+z = []
+for b in beta_range:
+    row = []
+    for H in Hs:
+        row.append(mag_func_two_spin(H, b, J=J))
+    z.append(row)
+
+# Create a trace
+trace = go.Surface(z=z)
+
+data = [trace]
+# Plot and embed in ipython notebook
+filename = 'magnetisation-surface-for-double-spin-interaction-J_{}-T{}-{}-{}'.format(
+    J, min_temp, max_temp, beta_range_type)
+plotly.offline.plot(data, filename=filename)
