@@ -1,3 +1,7 @@
+"""
+The actual Boltzmann constant is
+k = 1.38064852 × 10-23 m^2 kg s^-2 K^-1
+"""
 from math import tanh, sinh, cosh, exp, log
 from functools import partial
 from colorsys import hsv_to_rgb
@@ -11,10 +15,6 @@ from matplotlib import cm
 import plotly.graph_objs as go
 import plotly
 
-"""
-The actual Boltzmann constant is
-k = 1.38064852 × 10-23 m^2 kg s^-2 K^-1
-"""
 
 # k = 1.38064852e-23 # Boltzmann constant
 k = 1.0  # Boltzmann constant
