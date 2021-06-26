@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "stat-mech"
+version = "0.1.0"
+description = ""
+authors = ["Hissanova"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+numpy = "^1.21.0"
+plotly = "^5.0.0"
+matplotlib = "^3.4.2"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.910"
+flake8 = "^3.9.2"
+jedi = "^0.17.2"
+ipython = "^7.25.0"
+yapf = "^0.31.0"
+pytest = "^6.2.4"
+isort = "^5.9.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
